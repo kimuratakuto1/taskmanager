@@ -1,0 +1,25 @@
+# Pythonのバイトコード
+*.pyc
+*.pyo
+__pycache__
+
+# Django関連
+db.sqlite3        # SQLiteデータベース（ローカル開発中のみ）
+*.log             # ログファイル
+
+# 環境変数
+.env              # 環境変数ファイル
+
+# IDE/エディタ設定
+.vscode/          # VSCode設定
+.idea/            # PyCharm設定
+
+# 静的ファイルとメディアファイル
+/static/
+media/
+
+# macOS特有のファイル
+.DS_Store         # macOSの隠しファイル
+
+# その他
+my-app/           # 不要なファイルやディレクトリ

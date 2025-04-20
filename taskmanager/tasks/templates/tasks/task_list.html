@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>タスク一覧</title>
+</head>
+<body>
+<h1>タスク管理アプリ</h1>
+    <h2>新規タスク作成</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="新しいタスクを入力">
+        <button type="submit">追加</button>
+    </form>
+
+    <hr>
+<h2>業務終了</h2>
+<form method="POST" action="{% url 'end_of_day' %}">
+    {% csrf_token %}
+    <button type="submit">業務終了</button>
+</form>
+
+    <hr>
+<h2>タスク一覧</h2>
+    <h3>未完了タスク</h3>
+    <ul>
+        {% for task in tasks %}
+            {% if task.is_done == False %}
+            <li>
+                <span>{{ task.id }}</span>
+                <span>{{ task.title }}</span>
+                <a href="{% url 'task_edit' task.id %}">Edit</a>
+                <a href="{% url 'task_delete' task.id %}">Delete</a>
+                <form method="POST" action="{% url 'task_complete' task.id %}">
+                    {% csrf_token %}
+                    <button type="submit">完了</button>
+                </form>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul> 
+        <br>
+    <h3>完了タスク</h3>
+    <ul>
+        {% for task in tasks %}
+            {% if task.is_done == True %}
+            <li>
+                <span>{{ task.id }}</span>
+                <span>{{ task.title }}</span>
+                <a href="{% url 'task_edit' task.id %}">Edit</a>
+                <a href="{% url 'task_delete' task.id %}">Delete</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</body>
+</html>
