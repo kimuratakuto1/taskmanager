@@ -23,3 +23,13 @@ media/
 
 # その他
 my-app/           # 不要なファイルやディレクトリ
+
+# Node.js関連
+node_modules/
+
+# 仮想環境
+venv/
+
+# 一時ファイルやキャッシュ
+.cache/
+
