@@ -1,24 +1,32 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Task
+from .models import Task, TaskTemplate
 from django.utils import timezone
 
 
-#タスクリスト
+#タスク追加
 def task_list(request):
     if request.method == "POST":
         title = request.POST.get("title")
+        description = request.POST.get("description")
+        date = request.POST.get("date")
+        task_type = request.POST.get("task_type")
         if title:
-            Task.objects.create(title=title)
+            if task_type == "daily":
+                TaskTemplate.objects.create(title=title, description=description, is_daily=True)
+            else:
+                Task.objects.create(title=title, description=description, date=date)
             return redirect('/')
         
     tasks = Task.objects.all()
     return render(request, 'tasks/task_list.html', {'tasks': tasks})
+
 
 #タスク編集
 def task_edit(request, task_id):
     task = get_object_or_404(Task, pk=task_id)
     if request.method == 'POST':
         task.title = request.POST.get('title')
+        task.description = request.POST.get('description')
         task.save()
         return redirect('/')
     
@@ -45,7 +53,42 @@ def task_complete(request, task_id):
         return redirect('/')
 
 
-#業務終了
+#業務開始
+def start_of_day(request):
+    if request.method == 'POST':
+        print("POST request received")
+        today = timezone.now().date()
+        templates = TaskTemplate.objects.filter(is_daily=True)
+        
+        if not templates:
+            print("No daily templates found")
+        
+        for template in templates:
+            print(f"Checking task for: Title: {template.title}, Description: {template.description}, Date: {today}")
+            
+            # 既存のタスクがあるかどうか確認
+            existing_task = Task.objects.filter(
+                title=template.title,
+                description=template.description,
+                date=today
+            ).exists()
+            
+            if not existing_task:
+                print(f"Creating task: Title: {template.title}, Description: {template.description}, Date: {today}")
+                Task.objects.create(
+                    title=template.title,
+                    description=template.description,
+                    date=today
+                )
+            else:
+                print(f"Task already exists for: {template.title}, {template.description}")
+        
+        print("Task creation process completed.")
+        return redirect('/')  # トップページにリダイレクト
+
+
+
+# 業務終了
 def end_of_day(request):
     if request.method == 'POST':
         today = timezone.now().date()
