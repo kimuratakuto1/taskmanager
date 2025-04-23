@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task, TaskTemplate
 from django.utils import timezone
+from django.utils.timezone import now
 
 
 #タスク追加
@@ -16,9 +17,16 @@ def task_list(request):
             else:
                 Task.objects.create(title=title, description=description, date=date)
             return redirect('/')
-        
-    tasks = Task.objects.all()
-    return render(request, 'tasks/task_list.html', {'tasks': tasks})
+    incomplete_tasks = Task.objects.filter(is_done=False)
+    today = now().date()
+    completed_today_tasks = Task.objects.filter(is_done=True, completed_at__date=today)
+    template_tasks = TaskTemplate.objects.all()
+    return render(request, 'tasks/task_list.html', {
+        'incomplete_tasks': incomplete_tasks,
+        'completed_today_tasks': completed_today_tasks,
+        'today': today,
+        'template_tasks': template_tasks,
+    })
 
 
 #タスク編集
@@ -32,6 +40,16 @@ def task_edit(request, task_id):
     
     return render(request, 'tasks/task_edit.html', {'task': task})
 
+#定型タスク編集
+def template_task_edit(request, task_id):
+    task = get_object_or_404(TaskTemplate, pk=task_id)
+    if request.method == 'POST':
+        task.title = request.POST.get('title')
+        task.description = request.POST.get('description')
+        task.save()
+        return redirect('/')
+    return render(request, 'tasks/template_task_edit.html', {'task': task})
+
 
 #タスク消去
 def task_delete(request, task_id):
@@ -41,6 +59,15 @@ def task_delete(request, task_id):
         return redirect('/')
 
     return render(request, 'tasks/task_delete.html', {'task': task})
+
+#定型タスク消去
+def template_task_delete(request, task_id):
+    task = get_object_or_404(TaskTemplate, pk=task_id)
+    if request.method == 'POST':
+        task.delete()
+        return redirect('/')
+    return render(request, 'tasks/template_task_delete.html', {'task': task})
+
 
 
 #タスク完了
