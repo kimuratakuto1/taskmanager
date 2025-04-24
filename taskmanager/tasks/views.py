@@ -17,15 +17,17 @@ def task_list(request):
             else:
                 Task.objects.create(title=title, description=description, date=date)
             return redirect('/')
-    incomplete_tasks = Task.objects.filter(is_done=False)
     today = now().date()
+    incomplete_tasks = Task.objects.filter(is_done=False,date=today,template__isnull=True)
     completed_today_tasks = Task.objects.filter(is_done=True, completed_at__date=today)
     template_tasks = TaskTemplate.objects.all()
+    future_tasks = Task.objects.filter(date__gt=timezone.now().date(), template__isnull=True).order_by('date')
     return render(request, 'tasks/task_list.html', {
         'incomplete_tasks': incomplete_tasks,
         'completed_today_tasks': completed_today_tasks,
         'today': today,
         'template_tasks': template_tasks,
+        'future_tasks': future_tasks,
     })
 
 
@@ -35,6 +37,7 @@ def task_edit(request, task_id):
     if request.method == 'POST':
         task.title = request.POST.get('title')
         task.description = request.POST.get('description')
+        task.date = request.POST.get('date')
         task.save()
         return redirect('/')
     
